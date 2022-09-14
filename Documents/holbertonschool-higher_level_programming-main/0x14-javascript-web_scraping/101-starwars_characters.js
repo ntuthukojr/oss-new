@@ -1,28 +1,35 @@
 #!/usr/bin/node
-/*
- * Script that prints all characters of a Star Wars Movie
- *
-*/
-const movieId = process.argv[2];
-const request = require('request');
-const url = 'https://swapi-api.hbtn.io/api/films/' + movieId;
 
-request.get(url, (err, res, body) => {
-  if (err) {
-    console.error(err);
-  } else {
-    const characters = JSON.parse(body).characters;
-    let i = 0;
-    while(i < characters.length) {
-      request.get(characters[i], (err, res, body) => {
-        if (err) {
-          console.error(err);
-        } else {
-          const name = JSON.parse(body).name;
-          console.log(name);
-        }
-      });
-     i++;
+/**
+ * Write a script that prints all characters of a Star Wars movie:
+ * - The first argument is the Movie ID - example: 3 = “Return of the Jedi”
+ * - Display one character name by line
+ * - You must use the Star wars API
+ * - You must use the module request
+ */
+
+const request = require('request');
+const url = 'https://swapi-api.hbtn.io/api/films/';
+const movieId = process.argv[2];
+
+const syncChars = ([firstUrl, ...characters]) => {
+  if (!firstUrl) {
+    return;
+  }
+  request(firstUrl, function (err, _, body) {
+    if (err) console.log(err);
+    else {
+      const { name } = JSON.parse(body);
+      console.log(name);
     }
+    syncChars(characters);
+  });
+};
+
+request(`${url}${movieId}`, function (err, _, body) {
+  if (err) console.log(err);
+  else {
+    const { characters } = JSON.parse(body);
+    syncChars(characters);
   }
 });
